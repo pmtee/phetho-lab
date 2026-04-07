@@ -9,7 +9,7 @@ My learning journey — Python DevOps ML Power BI
 
 **Current focus**: Week 1 — Python foundations and data analytics
 
-**Environment**: Ubuntu 22.04 VM on VMware vCenter (Datacentrix enterprise lab)
+**Environment**: Ubuntu 22.04 VM on VMware vCenter.
 
 **GitHub**: github.com/pmtee
 
