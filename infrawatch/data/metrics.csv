@@ -1,0 +1,2 @@
+timestamp,date,hour,cpu_percent,ram_percent,ram_total_gb,ram_used_gb,disk_percent,disk_total_gb,disk_used_gb,net_sent_mb,net_recv_mb
+2026-04-23 16:48:57,2026-04-23,16,0.5,35.7,3.83,1.37,42.5,38.58,15.55,25.04,23.76
