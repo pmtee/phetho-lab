@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Titanic Survival Predictor</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #07070f;
+      color: #e2e2f0;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #00e5ff;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: #6e6e95;
+      font-family: monospace;
+    }
+
+    .card {
+      background: #13131f;
+      border: 1px solid #1e1e30;
+      padding: 36px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-family: monospace;
+      font-size: 11px;
+      color: #00e5ff;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full {
+      grid-column: span 2;
+    }
+
+    label {
+      font-family: monospace;
+      font-size: 11px;
+      color: #6e6e95;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    input, select {
+      background: #07070f;
+      border: 1px solid #1e1e30;
+      color: #e2e2f0;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: monospace;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    input:focus, select:focus {
+      border-color: #00e5ff;
+    }
+
+    select option {
+      background: #13131f;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: #00e5ff;
+      color: #07070f;
+      border: none;
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 24px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* RESULT CARD */
+    .result {
+      display: none;
+      background: #13131f;
+      border: 1px solid #1e1e30;
+      padding: 36px;
+      text-align: center;
+    }
+
+    .result.survived {
+      border-color: #00d68f;
+    }
+
+    .result.died {
+      border-color: #f43f5e;
+    }
+
+    .result-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .result-label {
+      font-family: monospace;
+      font-size: 11px;
+      color: #6e6e95;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .result-verdict {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+
+    .result.survived .result-verdict { color: #00d68f; }
+    .result.died .result-verdict     { color: #f43f5e; }
+
+    .result-prob {
+      font-family: monospace;
+      font-size: 14px;
+      color: #6e6e95;
+      margin-bottom: 24px;
+    }
+
+    /* PROBABILITY BAR */
+    .prob-bar-wrap {
+      background: #07070f;
+      border: 1px solid #1e1e30;
+      height: 8px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .prob-bar {
+      height: 100%;
+      width: 0%;
+      transition: width 1s ease;
+    }
+
+    .result.survived .prob-bar { background: #00d68f; }
+    .result.died     .prob-bar { background: #f43f5e; }
+
+    .result-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .detail-box {
+      background: #07070f;
+      border: 1px solid #1e1e30;
+      padding: 12px;
+    }
+
+    .detail-val {
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: #00e5ff;
+    }
+
+    .detail-lbl {
+      font-family: monospace;
+      font-size: 10px;
+      color: #6e6e95;
+      letter-spacing: 1px;
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+
+    /* ERROR */
+    .error-box {
+      display: none;
+      background: #1a0a0f;
+      border: 1px solid #f43f5e;
+      padding: 16px 20px;
+      font-family: monospace;
+      font-size: 12px;
+      color: #f43f5e;
+      margin-top: 16px;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      font-family: monospace;
+      font-size: 12px;
+      color: #6e6e95;
+      padding: 20px;
+      letter-spacing: 2px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-family: monospace;
+      font-size: 11px;
+      color: #3a3a55;
+    }
+
+    .footer a {
+      color: #00e5ff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Titanic Predictor</h1>
+    <p>ML model · 82.7% accuracy · Built by Phetho Tlaka</p>
+  </div>
+
+  <!-- INPUT FORM -->
+  <div class="card">
+    <div class="card-title">Passenger Details</div>
+
+    <div class="form-grid">
+
+      <div class="form-group">
+        <label for="pclass">Ticket Class</label>
+        <select id="pclass">
+          <option value="1">1st Class (Wealthy)</option>
+          <option value="2">2nd Class (Middle)</option>
+          <option value="3" selected>3rd Class (Poor)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="sex">Gender</label>
+        <select id="sex">
+          <option value="female">Female</option>
+          <option value="male" selected>Male</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="age">Age (years)</label>
+        <input type="number" id="age"
+               value="30" min="0" max="120">
+      </div>
+
+      <div class="form-group">
+        <label for="fare">Fare (£)</label>
+        <input type="number" id="fare"
+               value="15" min="0" step="0.01">
+      </div>
+
+      <div class="form-group">
+        <label for="sibsp">Siblings / Spouses</label>
+        <input type="number" id="sibsp"
+               value="0" min="0" max="10">
+      </div>
+
+      <div class="form-group">
+        <label for="parch">Parents / Children</label>
+        <input type="number" id="parch"
+               value="0" min="0" max="10">
+      </div>
+
+      <div class="form-group full">
+        <label for="embarked">Port of Embarkation</label>
+        <select id="embarked">
+          <option value="S" selected>
+            Southampton (S)
+          </option>
+          <option value="C">Cherbourg (C)</option>
+          <option value="Q">Queenstown (Q)</option>
+        </select>
+      </div>
+
+    </div>
+
+    <button class="btn" id="predictBtn"
+            onclick="predict()">
+      Predict Survival →
+    </button>
+
+    <div class="loading" id="loading">
+      Contacting API...
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result" id="result">
+    <div class="result-icon" id="resultIcon"></div>
+    <div class="result-label">Prediction</div>
+    <div class="result-verdict" id="resultVerdict"></div>
+    <div class="result-prob" id="resultProb"></div>
+    <div class="prob-bar-wrap">
+      <div class="prob-bar" id="probBar"></div>
+    </div>
+    <div class="result-details">
+      <div class="detail-box">
+        <div class="detail-val" id="detailPct"></div>
+        <div class="detail-lbl">Survival Prob</div>
+      </div>
+      <div class="detail-box">
+        <div class="detail-val" id="detailClass"></div>
+        <div class="detail-lbl">Class</div>
+      </div>
+      <div class="detail-box">
+        <div class="detail-val" id="detailFare"></div>
+        <div class="detail-lbl">Fare</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Built by <a href="https://pmtee.github.io">
+    Phetho Tlaka</a> ·
+    <a href="http://127.0.0.1:8000/docs">API Docs</a> ·
+    <a href="https://github.com/pmtee/phetho-lab">
+    GitHub</a>
+  </div>
+
+</div>
+
+<script>
+const API = 'http://192.168.10.116:8000';
+
+  async function predict() {
+    // Get values
+    const pclass   = parseInt(
+      document.getElementById('pclass').value);
+    const sex      = document.getElementById(
+      'sex').value;
+    const age      = parseFloat(
+      document.getElementById('age').value);
+    const fare     = parseFloat(
+      document.getElementById('fare').value);
+    const sibsp    = parseInt(
+      document.getElementById('sibsp').value);
+    const parch    = parseInt(
+      document.getElementById('parch').value);
+    const embarked = document.getElementById(
+      'embarked').value;
+
+    // Validate
+    if (isNaN(age) || age < 0 || age > 120) {
+      showError('Age must be between 0 and 120');
+      return;
+    }
+    if (isNaN(fare) || fare < 0) {
+      showError('Fare must be a positive number');
+      return;
+    }
+
+    // UI state
+    const btn = document.getElementById('predictBtn');
+    btn.disabled = true;
+    btn.textContent = 'Predicting...';
+    document.getElementById('loading').style.display
+      = 'block';
+    document.getElementById('result').style.display
+      = 'none';
+    document.getElementById('errorBox').style.display
+      = 'none';
+
+    try {
+      const response = await fetch(
+        `${API}/predict`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          pclass, sex, age, sibsp,
+          parch, fare, embarked
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(
+          err.detail?.[0]?.msg ||
+          `API error ${response.status}`);
+      }
+
+      const data = await response.json();
+      showResult(data, pclass, fare);
+
+    } catch (err) {
+      if (err.message.includes('fetch')) {
+        showError(
+          'Cannot reach API. Make sure python ' +
+          'main.py is running in your terminal.');
+      } else {
+        showError(err.message);
+      }
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Predict Survival →';
+      document.getElementById('loading')
+        .style.display = 'none';
+    }
+  }
+
+  function showResult(data, pclass, fare) {
+    const survived = data.survived === 1;
+    const prob     = data.probability;
+
+    const resultEl = document.getElementById('result');
+    resultEl.className = 'result ' +
+      (survived ? 'survived' : 'died');
+    resultEl.style.display = 'block';
+
+    document.getElementById('resultIcon').textContent
+      = survived ? '✓' : '✕';
+    document.getElementById('resultVerdict')
+      .textContent = data.prediction;
+    document.getElementById('resultProb').textContent
+      = `Survival probability: ${data.confidence}`;
+    document.getElementById('detailPct').textContent
+      = data.confidence;
+    document.getElementById('detailClass').textContent
+      = `${pclass}${pclass===1?'st':
+         pclass===2?'nd':'rd'} Class`;
+    document.getElementById('detailFare').textContent
+      = `£${fare}`;
+
+    // Animate probability bar
+    setTimeout(() => {
+      document.getElementById('probBar').style.width
+        = `${prob * 100}%`;
+    }, 50);
+
+    resultEl.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.textContent = '⚠ ' + msg;
+    box.style.display = 'block';
+  }
+
+  // Allow Enter key to submit
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') predict();
+  });
+</script>
+</body>
+</html>
