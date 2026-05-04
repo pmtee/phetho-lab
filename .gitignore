@@ -5,3 +5,4 @@ minikube-linux-amd64
 **/.ipynb_checkpoints/
 **/.virtual_documents/
 *.png
+.virtual_documents/
