@@ -1,0 +1,22 @@
+# DEPLOYMENT — tells Kubernetes what to run
+# "Keep 2 copies of titanic-api running always"
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: titanic-api        # name of this deployment
+spec:
+  replicas: 2              # run 2 pods at all times
+  selector:
+    matchLabels:
+      app: titanic-api
+  template:
+    metadata:
+      labels:
+        app: titanic-api
+    spec:
+      containers:
+      - name: titanic-api
+        image: titanic-api # your Docker image
+        imagePullPolicy: Never  # use local image
+        ports:
+        - containerPort: 8000  # app runs on 8000
